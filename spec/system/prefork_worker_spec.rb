@@ -5,8 +5,10 @@ when 'RedHat'
   servicename = 'httpd'
 when 'Debian'
   servicename = 'apache2'
+when 'FreeBSD'
+  servicename = 'apache22'
 else
-  raise Error, "Unconfigured OS for apache service on #{node.facts['osfamily']}"
+  raise "Unconfigured OS for apache service on #{node.facts['osfamily']}"
 end
 
 describe 'apache::mod::worker class' do

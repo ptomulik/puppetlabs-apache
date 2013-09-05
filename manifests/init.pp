@@ -13,8 +13,10 @@
 # Sample Usage:
 #
 class apache (
+  $apache_service       = $apache::params::apache_service,
   $default_mods         = true,
   $default_vhost        = true,
+  $default_confd_files  = true,
   $default_ssl_vhost    = false,
   $default_ssl_cert     = $apache::params::default_ssl_cert,
   $default_ssl_key      = $apache::params::default_ssl_key,
@@ -37,6 +39,7 @@ class apache (
   $mpm_module           = $apache::params::mpm_module,
   $conf_template        = $apache::params::conf_template,
   $servername           = $apache::params::servername,
+  $server_root          = $apache::params::server_root,
   $user                 = $apache::params::user,
   $group                = $apache::params::group,
   $keepalive            = $apache::params::keepalive,
@@ -45,17 +48,32 @@ class apache (
   $ports_file           = $apache::params::ports_file,
 ) inherits apache::params {
 
-  package { 'httpd':
-    ensure => installed,
-    name   => $apache::params::apache_name,
-    notify => Class['Apache::Service'],
-  }
-
   validate_bool($default_vhost)
+  validate_bool($default_confd_files)
   # true/false is sufficient for both ensure and enable
   validate_bool($service_enable)
+
+  $valid_mpms_re = $::osfamily ? {
+    'FreeBSD' => '(event|itk|peruser|prefork|worker)',
+    'Debian'  => '(itk|prefork|worker)',
+    default   => '(prefork|worker)'
+  }
+
   if $mpm_module {
-    validate_re($mpm_module, '(prefork|worker|itk)')
+    validate_re($mpm_module, $valid_mpms_re)
+  }
+
+  # NOTE: on FreeBSD it's mpm module's responsibility to install httpd package.
+  # NOTE: the same strategy may be introduced for other OSes. For this, you
+  # should delete the 'if' block below and modify all MPM modules' manifests
+  # such that they include apache::package class (currently event.pp, itk.pp,
+  # peruser.pp, prefork.pp, worker.pp).
+  if $::osfamily != 'FreeBSD' {
+    package { 'httpd':
+      ensure => present,
+      name   => $apache::params::apache_name,
+      notify => Class['Apache::Service'],
+    }
   }
 
   # declare the web server user and group
@@ -72,6 +90,7 @@ class apache (
   }
 
   class { 'apache::service':
+    service_name   => $apache_service,
     service_enable => $service_enable,
   }
 
@@ -163,7 +182,7 @@ class apache (
 
   concat { $ports_file:
     owner   => 'root',
-    group   => 'root',
+    group   => $apache::params::root_group,
     mode    => '0644',
     notify  => Class['Apache::Service'],
     require => Package['httpd'],
@@ -191,12 +210,23 @@ class apache (
         $scriptalias          = '/var/www/cgi-bin'
         $access_log_file      = 'access_log'
       }
+      'freebsd': {
+        $docroot              = '/usr/local/www/apache22/data'
+        $pidfile              = '/var/run/httpd.pid'
+        $error_log            = 'httpd-error.log'
+        $error_documents_path = '/usr/local/www/apache22/error'
+        $scriptalias          = '/usr/local/www/apache22/cgi-bin'
+        $access_log_file      = 'httpd-access.log'
+      }
       default: {
         fail("Unsupported osfamily ${::osfamily}")
       }
     }
+    $freebsd_workarounds = $::osfamily ? {
+      'freebsd' => true,
+      default   => false
+    }
     # Template uses:
-    # - $httpd_dir
     # - $pidfile
     # - $user
     # - $group
@@ -209,8 +239,10 @@ class apache (
     # - $vhost_dir
     # - $error_documents
     # - $error_documents_path
+    # - $freebsd_workarounds
     # - $keepalive
     # - $keepalive_timeout
+    # - $server_root
     file { "${apache::params::conf_dir}/${apache::params::conf_file}":
       ensure  => file,
       content => template($conf_template),
@@ -230,6 +262,9 @@ class apache (
         all => $default_mods,
       }
     }
+    class { 'apache::default_confd_files':
+      all => $default_confd_files
+    }
     if $mpm_module {
       class { "apache::mod::${mpm_module}": }
     }
@@ -243,6 +278,10 @@ class apache (
         priority        => '15',
       }
     }
+    $ssl_access_log_file = $::osfamily ? {
+      'freebsd' => $access_log_file,
+      default   => "ssl_${access_log_file}",
+    }
     if $default_ssl_vhost {
       apache::vhost { 'default-ssl':
         port            => 443,
@@ -250,7 +289,7 @@ class apache (
         docroot         => $docroot,
         scriptalias     => $scriptalias,
         serveradmin     => $serveradmin,
-        access_log_file => "ssl_${access_log_file}",
+        access_log_file => $ssl_access_log_file,
         priority        => '15',
       }
     }
