@@ -136,6 +136,51 @@ class apache::params {
     $keepalive_timeout = 15
     $mime_support_package = 'mime-support'
     $mime_types_config = '/etc/mime.types'
+  } elsif $::osfamily == 'Archlinux' {
+    $user             = 'http'
+    $group            = 'http'
+    $root_group       = 'root'
+    $apache_name      = 'apache'
+    $apache_service   = 'httpd'
+    $httpd_dir        = '/etc/httpd'
+    $server_root      = '/etc/httpd'
+    $conf_dir         = "${httpd_dir}/conf"
+    $confd_dir        = "${httpd_dir}/conf/extra"
+    $mod_dir          = "${httpd_dir}/modules"
+    $vhost_dir        = "${httpd_dir}/conf/extra"
+    $conf_file        = 'httpd.conf'
+    $ports_file       = "${httpd_dir}/ports.conf"
+    $logroot          = '/var/log/httpd'
+    $lib_path         = '/usr/lib/httpd/modules'
+    $mpm_module       = 'worker'
+    $dev_packages     = undef
+    $default_ssl_cert = '/etc/httpd/conf/server.crt'
+    $default_ssl_key  = '/etc/httpd/conf/server.key'
+    $ssl_certs_dir    = '/etc/ssl/certs'
+    $passenger_root   = '/usr/lib/ruby/gems/2.0.0/gems/passenger-3.0.17'
+    $passenger_ruby   = '/usr/bin/ruby'
+    $suphp_addhandler  = 'x-httpd-php'
+    $suphp_engine      = 'off'
+    $suphp_configpath  = '/etc/php'
+    $mod_packages     = {
+      'auth_kerb'     => 'mod_auth_kerb',
+      'fcgid'         => 'mod_fcgid',
+      'passenger'     => 'passenger',
+      'perl'          => 'mod_perl',
+      'php5'          => ['php', 'php-apache',],
+      'python'        => 'mod_python',
+      'wsgi'          => 'mod_wsgi',
+      'xsendfile'     => 'mod_xsendfile',
+    }
+    $mod_libs         = {
+      'php5'          => 'libphp5.so',
+    }
+
+    $conf_template     = 'apache/httpd.conf.erb'
+    $keepalive         = 'Off'
+    $keepalive_timeout = 15
+    $mime_support_package = undef
+    $mime_types_config    = '/etc/httpd/conf/mime.types'
   } elsif $::osfamily == 'FreeBSD' {
     $user             = 'www'
     $group            = 'www'
@@ -188,6 +233,7 @@ class apache::params {
     $keepalive_timeout    = 15
     $mime_support_package = 'misc/mime-support'
     $mime_types_config    = '/usr/local/etc/mime.types'
+
   } else {
     fail("Class['apache::params']: Unsupported osfamily: ${::osfamily}")
   }

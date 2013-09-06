@@ -5,6 +5,8 @@ when 'RedHat'
   servicename = 'httpd'
 when 'Debian'
   servicename = 'apache2'
+when 'Archlinux'
+  servicename = 'httpd'
 when 'FreeBSD'
   servicename = 'apache22'
 else

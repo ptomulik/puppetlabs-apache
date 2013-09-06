@@ -6,7 +6,7 @@ class apache::default_mods (
   # They are not configurable at this time, so we just include
   # them to make sure it works.
   case $::osfamily {
-    'redhat', 'freebsd': {
+    'redhat', 'archlinux', 'freebsd': {
       apache::mod { 'log_config': }
     }
     default: {}
@@ -33,6 +33,32 @@ class apache::default_mods (
         apache::mod { 'authz_owner': }
         apache::mod { 'expires': }
         apache::mod { 'ext_filter': }
+        apache::mod { 'include': }
+        apache::mod { 'logio': }
+        apache::mod { 'rewrite': }
+        apache::mod { 'speling': }
+        apache::mod { 'substitute': }
+        apache::mod { 'suexec': }
+        apache::mod { 'usertrack': }
+        apache::mod { 'version': }
+      }
+       'archlinux': {
+        include apache::mod::cache
+        include apache::mod::mime_magic
+        include apache::mod::vhost_alias
+        include apache::mod::reqtimeout
+        apache::mod { 'actions': }
+        apache::mod { 'auth_digest': }
+        apache::mod { 'authn_alias': }
+        apache::mod { 'authn_anon': }
+        apache::mod { 'authn_dbm': }
+        apache::mod { 'authn_default': }
+        apache::mod { 'authz_dbm': }
+        apache::mod { 'authz_owner': }
+        apache::mod { 'authn_dbd': }
+        apache::mod { 'expires': }
+        apache::mod { 'ext_filter': }
+        apache::mod { 'filter': }
         apache::mod { 'include': }
         apache::mod { 'logio': }
         apache::mod { 'rewrite': }

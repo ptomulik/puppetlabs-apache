@@ -12,6 +12,9 @@ class apache::mod::proxy_html {
         default => "/usr/lib/${::hardwaremodel}-linux-gnu/libxml2.so.2",
       }
     }
+    'Archlinux': {
+      $proxy_html_loadfiles = '/usr/lib/libxml2.so.2'
+    }
     'FreeBSD': {
       apache::mod { 'xml2enc': }
     }

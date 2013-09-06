@@ -63,7 +63,16 @@ class apache::mod::worker (
         ensure => present,
       }
     }
-    'freebsd' : {
+    'archlinux': {
+      file_line { '/etc/conf.d/apache worker enable':
+        ensure => present,
+        path   => '/etc/conf.d/apache',
+        line   => 'HTTPD=/usr/sbin/httpd.worker',
+        match  => '#?HTTPD=/usr/sbin/httpd.worker',
+        notify => Service['httpd'],
+      }
+    }
+    'freebsd': {
       class { 'apache::package':
         mpm_module => 'worker'
       }

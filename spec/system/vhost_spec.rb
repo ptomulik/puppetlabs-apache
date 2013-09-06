@@ -14,6 +14,10 @@ describe 'apache::vhost define' do
     vhost_dir = '/etc/apache2/sites-enabled'
     package_name = 'apache2'
     service_name = 'apache2'
+  when 'Archlinux'
+    vhost_dir = '/etc/httpd/conf/extra'
+    package_name = 'apache'
+    service_name = 'httpd'
   end
 
   context "default vhost without ssl" do

@@ -23,6 +23,16 @@ describe 'apache::dev', :type => :class do
     it { should include_class("apache::params") }
     it { should contain_package("httpd-devel") }
   end
+  context "on Archlinux" do
+    let :facts do
+      {
+        :osfamily               => 'Archlinux',
+        :operatingsystemrelease => 'Rolling',
+      }
+    end
+    it { should include_class("apache::params") }
+    it { should contain_package("undef") }
+  end
   context "on a FreeBSD OS" do
     let :pre_condition do
       'include apache::package'

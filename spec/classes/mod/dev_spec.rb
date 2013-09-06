@@ -1,9 +1,10 @@
 require 'spec_helper'
 describe 'apache::mod::dev', :type => :class do
   [
-    ['RedHat',  '6'],
-    ['Debian',  '6'],
-    ['FreeBSD', '9'],
+    ['RedHat',    '6'],
+    ['Debian',    '6'],
+    ['FreeBSD',   '9'],
+    ['Archlinux', 'Rolling']
   ].each do |osfamily, operatingsystemrelease|
     if osfamily == 'FreeBSD'
       let :pre_condition do

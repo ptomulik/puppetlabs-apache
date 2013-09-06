@@ -62,7 +62,17 @@ class apache::mod::prefork (
         ensure => present,
       }
     }
-    'freebsd' : {
+    'archlinux': {
+      file_line { '/etc/conf.d/apache prefork enable':
+        ensure  => present,
+        path    => '/etc/conf.d/apache',
+        line    => '#HTTPD=/usr/bin/httpd.worker',
+        match   => '#?HTTPD=/usr/bin/httpd.worker',
+        require => Package['httpd'],
+        notify  => Service['httpd'],
+      }
+    }
+    'freebsd': {
       class { 'apache::package':
         mpm_module => 'prefork'
       }

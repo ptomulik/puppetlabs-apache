@@ -11,6 +11,9 @@ describe 'apache class' do
   when 'FreeBSD'
     package_name = 'apache22'
     service_name = 'apache22'
+  when 'Archlinux'
+    package_name = 'apache'
+    service_name = 'httpd'
   end
 
   context 'default parameters' do

@@ -110,6 +110,7 @@ class apache (
     creates => $confd_dir,
     require => Package['httpd'],
   }
+
   file { $confd_dir:
     ensure  => directory,
     recurse => true,
@@ -123,6 +124,7 @@ class apache (
       creates => $mod_dir,
       require => Package['httpd'],
     }
+
     file { $mod_dir:
       ensure  => directory,
       recurse => true,
@@ -134,10 +136,12 @@ class apache (
 
   if $mod_enable_dir and ! defined(File[$mod_enable_dir]) {
     $mod_load_dir = $mod_enable_dir
+
     exec { "mkdir ${mod_enable_dir}":
       creates => $mod_enable_dir,
       require => Package['httpd'],
     }
+
     file { $mod_enable_dir:
       ensure  => directory,
       recurse => true,
@@ -154,6 +158,7 @@ class apache (
       creates => $vhost_dir,
       require => Package['httpd'],
     }
+
     file { $vhost_dir:
       ensure  => directory,
       recurse => true,
@@ -165,10 +170,12 @@ class apache (
 
   if $vhost_enable_dir and ! defined(File[$vhost_enable_dir]) {
     $vhost_load_dir = $vhost_enable_dir
+
     exec { "mkdir ${vhost_load_dir}":
       creates => $vhost_load_dir,
       require => Package['httpd'],
     }
+
     file { $vhost_enable_dir:
       ensure  => directory,
       recurse => true,
@@ -187,6 +194,7 @@ class apache (
     notify  => Class['Apache::Service'],
     require => Package['httpd'],
   }
+
   concat::fragment { 'Apache ports header':
     target  => $ports_file,
     content => template('apache/ports_header.erb')
@@ -210,6 +218,14 @@ class apache (
         $scriptalias          = '/var/www/cgi-bin'
         $access_log_file      = 'access_log'
       }
+      'archlinux': {
+        $docroot              = '/srv/http'
+        $pidfile              = '/var/run/httpd/httpd.pid'
+        $error_log            = 'error.log'
+        $error_documents_path = '/usr/share/httpd/error'
+        $scriptalias          = '/usr/lib/cgi-bin'
+        $access_log_file      = 'access.log'
+      }
       'freebsd': {
         $docroot              = '/usr/local/www/apache22/data'
         $pidfile              = '/var/run/httpd.pid'
@@ -226,6 +242,7 @@ class apache (
       'freebsd' => true,
       default   => false
     }
+
     # Template uses:
     # - $pidfile
     # - $user
@@ -262,12 +279,15 @@ class apache (
         all => $default_mods,
       }
     }
+
     class { 'apache::default_confd_files':
       all => $default_confd_files
     }
+
     if $mpm_module {
       class { "apache::mod::${mpm_module}": }
     }
+
     if $default_vhost {
       apache::vhost { 'default':
         port            => 80,
@@ -282,6 +302,7 @@ class apache (
       'freebsd' => $access_log_file,
       default   => "ssl_${access_log_file}",
     }
+
     if $default_ssl_vhost {
       apache::vhost { 'default-ssl':
         port            => 443,

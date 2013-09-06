@@ -1,8 +1,9 @@
 class apache::mod::disk_cache {
   $cache_root = $::osfamily ? {
-    'debian'  => '/var/cache/apache2/mod_disk_cache',
-    'redhat'  => '/var/cache/mod_proxy',
-    'freebsd' => '/var/cache/mod_disk_cache',
+    'debian'    => '/var/cache/apache2/mod_disk_cache',
+    'redhat'    => '/var/cache/mod_proxy',
+    'archlinux' => '/var/cache/apache',
+    'freebsd'   => '/var/cache/mod_disk_cache',
   }
   if $::osfamily != 'FreeBSD' {
     # FIXME: investigate why disk_cache was dependent on proxy

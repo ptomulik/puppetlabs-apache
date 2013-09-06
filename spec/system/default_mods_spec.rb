@@ -7,6 +7,8 @@ when 'Debian'
   servicename = 'apache2'
 when 'FreeBSD'
   servicename = 'apache22'
+when 'Archlinux'
+  servicename = 'httpd'
 else
   raise "Unconfigured OS for apache service on #{node.facts['osfamily']}"
 end
